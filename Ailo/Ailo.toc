@@ -1,12 +1,10 @@
 ## Interface: 30300
 ## Author: Starfox
-## Title: Ailo
+## Title: Ailo |cff33ff99Enhanced|r
+## Notes: Version 129
 ## SavedVariables: AiloDB
 ## OptionalDeps: Ace3, LibDBIcon-1.0, LibQTip-1.0, !ClassColors
-## X-Curse-Packaged-Version: 1.0.35
-## X-Curse-Project-Name: Am I locked out?
-## X-Curse-Project-ID: ailo
-## X-Curse-Repository-ID: wow/ailo/mainline
+## X-Curse-Packaged-Version: r128
 
 #@no-lib-strip@
 Libs\LibStub\LibStub.lua
@@ -28,11 +26,11 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Localization\enUS.lua
 Localization\deDE.lua
-Localization\frFR.lua
 Localization\esES.lua
+Localization\frFR.lua
 Localization\koKR.lua
-Localization\zhTW.lua
-Localization\zhCN.lua
 Localization\ruRU.lua
+Localization\zhCN.lua
+Localization\zhTW.lua
 
 Ailo.lua

@@ -41,3 +41,6 @@ L["Updating data for current player."] = "Mise à jour des données pour le joue
 L["Use !ClassColors"] = "Utiliser l'addon !ClassColors"
 L["Use !ClassColors addon for class colors used to color the names in the tooltip"] = "Utiliser l'addon !ClassColors pour les couleurs de classe utilisées pour colorer les noms dans l'info-bulle."
 L["Wipe Database"] = "Remise à zéro de la base de données"
+
+L["Track 'Event boss'"] = true -- Requires localization
+L["TRACK_DAILY_EVENT_BOSS_DESC"] = "During a World Event, show a column in the tooltip indicating if a character has done the 'Event Boss instance'" -- Requires localization

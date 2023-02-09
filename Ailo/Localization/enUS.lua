@@ -42,3 +42,6 @@ L["Updating data for current player."] = true
 L["Use !ClassColors"] = true
 L["Use !ClassColors addon for class colors used to color the names in the tooltip"] = true
 L["Wipe Database"] = true
+
+L["Track 'Event boss'"] = true
+L["TRACK_DAILY_EVENT_BOSS_DESC"] = "During a World Event, show a column in the tooltip indicating if a character has done the 'Event Boss instance'"

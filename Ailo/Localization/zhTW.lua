@@ -41,3 +41,6 @@ L["Updating data for current player."] = "更新當前角色資訊"
 L["Use !ClassColors"] = "使用職業顏色"
 L["Use !ClassColors addon for class colors used to color the names in the tooltip"] = "將角色名稱依職業顯示不同顏色"
 L["Wipe Database"] = "清除資料庫"
+
+L["Track 'Event boss'"] = true -- Requires localization
+L["TRACK_DAILY_EVENT_BOSS_DESC"] = "During a World Event, show a column in the tooltip indicating if a character has done the 'Event Boss instance'" -- Requires localization

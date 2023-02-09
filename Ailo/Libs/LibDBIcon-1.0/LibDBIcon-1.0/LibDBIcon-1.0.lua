@@ -1,6 +1,6 @@
 --[[
 Name: DBIcon-1.0
-Revision: $Rev: 12 $
+Revision: $Rev: 14 $
 Author(s): Rabbit (rabbit.magtheridon@gmail.com)
 Description: Allows addons to register to recieve a lightweight minimap icon as an alternative to more heavy LDB displays.
 Dependencies: LibStub
@@ -8,7 +8,7 @@ License: GPL v2 or later.
 ]]
 
 --[[
-Copyright (C) 2008-2009 Rabbit
+Copyright (C) 2008-2010 Rabbit
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 --
 
 local DBICON10 = "LibDBIcon-1.0"
-local DBICON10_MINOR = tonumber(("$Rev: 12 $"):match("(%d+)"))
+local DBICON10_MINOR = tonumber(("$Rev: 14 $"):match("(%d+)"))
 if not LibStub then error(DBICON10 .. " requires LibStub.") end
 local ldb = LibStub("LibDataBroker-1.1", true)
 if not ldb then error(DBICON10 .. " requires LibDataBroker-1.1.") end
@@ -242,6 +242,7 @@ function lib:Refresh(name, db)
 	local button = lib.objects[name]
 	if db then button.db = db end
 	updatePosition(button)
+	if not db.hide then button:Show() else button:Hide() end
 end
 
 function lib:EnableLibrary()
