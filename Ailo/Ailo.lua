@@ -10,10 +10,13 @@ local reset_wday = 4 -- 4:Wednesday
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
 local LDBIcon = ldb and LibStub("LibDBIcon-1.0",true)
 local LibQTip = LibStub('LibQTip-1.0')
-local Ailo = LibStub("AceAddon-3.0"):NewAddon("Ailo", "AceConsole-3.0", "AceEvent-3.0")
+local Ailo = LibStub("AceAddon-3.0"):NewAddon("Ailo", "AceConsole-3.0", "AceEvent-3.0") --, "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Ailo", false)
 local DB_VERSION = 3
 local currentChar, currentRealm, currentCharRealm, currentMaxLevel
+
+local AceTimer = LibStub("AceTimer-3.0")
+AceTimer:Embed(Ailo)
 
 -- Sorting
 local sortRealms = {}
@@ -155,7 +158,11 @@ end
 function Ailo:OnEnable()
 	if debug_print then print("---DEBUG: Ailo:OnEnable() ---") end
 	-- check, if we have an active season
-	self:CheckSeasonActive()
+	-- self:CheckSeasonActive()
+	
+	OpenCalendar()
+	-- self:CheckSeasonActive()
+	self:ScheduleTimer("CheckSeasonActive", 2) -- wait 3 secs 
 	
 	
 end
@@ -912,6 +919,8 @@ function Ailo:CheckSeasonActive()
 	local eventName, eventTexture, month, day, numEvents
 	Seasonal.ActiveHoliday = nil -- resets local variable
 	
+	if debug_print then print("---DEBUG: Ailo:CheckSeasonActive() ---") end
+	
 	_, month, day, _ = CalendarGetDate(); -- get current date
 	CalendarSetAbsMonth(month) -- set the Calender to be at the current month, current year (absolute)
 	numEvents = CalendarGetNumDayEvents(0, day) -- get the number of events on the current day
@@ -924,6 +933,7 @@ function Ailo:CheckSeasonActive()
 				for k,v in pairs(Seasonal.Events) do
 					if eventTexture == v.texture_name then
 						Seasonal.ActiveHoliday = Seasonal.Events[k] -- stores to local variable
+						if debug_print then print("---DEBUG: detected Season:", k, v.texture_name) end
 					end
 				end
 			end
@@ -937,6 +947,7 @@ function Ailo:CheckSeasonActive()
 			if numEvents > 0 then print(Seasonal.ActiveHoliday.texture_name) end
 		end
 	end
+	
 end
 
 

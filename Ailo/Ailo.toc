@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Author: Starfox
 ## Title: Ailo |cff33ff99Enhanced|r
-## Notes: Version 129
+## Notes: Am I locked out? - Displays all RaidIDs for all chars
 ## SavedVariables: AiloDB
 ## OptionalDeps: Ace3, LibDBIcon-1.0, LibQTip-1.0, !ClassColors
 ## X-Curse-Packaged-Version: r128
@@ -17,6 +17,7 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 Libs\AceConsole-3.0\AceConsole-3.0.xml
 Libs\AceEvent-3.0\AceEvent-3.0.xml
 Libs\AceLocale-3.0\AceLocale-3.0.xml
+libs\AceTimer-3.0\AceTimer-3.0.xml
 Libs\LibQTip-1.0\lib.xml
 #@end-no-lib-strip@
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
