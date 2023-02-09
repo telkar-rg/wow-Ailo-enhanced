@@ -90,7 +90,7 @@ function Ailo:OnInitialize()
 	if debug_print then print("---DEBUG: Ailo:OnInitialize() ---") end
 
     -- currentMaxLevel = MAX_PLAYER_LEVEL_TABLE[#MAX_PLAYER_LEVEL_TABLE]
-	currentMaxLevel = 50 -- we can get ids from lvl 50 onwards (ZG, AQ)
+	currentMaxLevel = 80 -- we can get ids from lvl 50 onwards (ZG, AQ)
 	currentCharLevel = UnitLevel("player")
     currentChar = UnitName("player")
     currentRealm = GetRealmName()
@@ -987,6 +987,7 @@ function Ailo:CheckCharGear()
 	local invSlot, itemRarity, itemLevel, itemID, accumLevel, numSlots
 	-- itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemID) 
 	local thisCharDB = self.db.global.chars[currentRealm][currentChar]
+	if not thisCharDB then return end
 	
 	accumLevel = 0
 	numSlots = 0

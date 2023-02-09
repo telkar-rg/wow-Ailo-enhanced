@@ -27,11 +27,5 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Localization\enUS.lua
 Localization\deDE.lua
-Localization\esES.lua
-Localization\frFR.lua
-Localization\koKR.lua
-Localization\ruRU.lua
-Localization\zhCN.lua
-Localization\zhTW.lua
 
 Ailo.lua
