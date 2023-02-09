@@ -13,7 +13,7 @@ local LibQTip = LibStub('LibQTip-1.0')
 local Ailo = LibStub("AceAddon-3.0"):NewAddon("Ailo", "AceConsole-3.0", "AceEvent-3.0") --, "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Ailo", false)
 local DB_VERSION = 3
-local currentChar, currentRealm, currentCharRealm, currentMaxLevel
+local currentChar, currentRealm, currentCharRealm, currentMaxLevel, currentCharLevel
 
 local AceTimer = LibStub("AceTimer-3.0")
 AceTimer:Embed(Ailo)
@@ -68,19 +68,19 @@ local defaults = {
 local Seasonal = {}
 Seasonal.ActiveHoliday = nil -- resets local variable
 Seasonal.Events = {
-	LoveInTheAir = { icon = "|TInterface\\Icons\\inv_valentinesboxofchocolates02:0|t", 
+	LoveInTheAir = { icon = "|TInterface\\Icons\\inv_valentinesboxofchocolates02:20|t", 
 					texture_name = "Calendar_LoveInTheAir",
 					dungeon_id = 288 },
-	Midsummer = { icon = "|TInterface\\Icons\\inv_summerfest_fireflower:0|t", 
+	Midsummer = { icon = "|TInterface\\Icons\\inv_summerfest_fireflower:20|t", 
 					texture_name = "Calendar_Midsummer",
 					dungeon_id = 286 },
-	Brewfest = { icon = "|TInterface\\Icons\\inv_holiday_brewfestbuff_01:0|t", 
+	Brewfest = { icon = "|TInterface\\Icons\\inv_holiday_brewfestbuff_01:20|t", 
 					texture_name = "Calendar_Brewfest",
 					dungeon_id = 287 },
-	HallowsEnd = { icon = "|TInterface\\Icons\\Inv_misc_food_59:0|t", 
+	HallowsEnd = { icon = "|TInterface\\Icons\\Inv_misc_food_59:20|t", 
 					texture_name = "Calendar_HallowsEnd",
 					dungeon_id = 285 },
-    -- WinterVeil = { icon = "|TInterface\\Icons\\inv_holiday_christmas_present_01:0|t",
+    -- WinterVeil = { icon = "|TInterface\\Icons\\inv_holiday_christmas_present_01:20|t",
 					-- texture_name = "Calendar_WinterVeil",
 					-- quest_ids = { 6983, 7043 }, },
 }
@@ -91,11 +91,12 @@ function Ailo:OnInitialize()
 
     -- currentMaxLevel = MAX_PLAYER_LEVEL_TABLE[#MAX_PLAYER_LEVEL_TABLE]
 	currentMaxLevel = 50 -- we can get ids from lvl 50 onwards (ZG, AQ)
+	currentCharLevel = UnitLevel("player")
     currentChar = UnitName("player")
     currentRealm = GetRealmName()
     currentCharRealm = currentChar..' - '..currentRealm
 
-    if currentMaxLevel <= UnitLevel("player") then 
+    if currentMaxLevel <= currentCharLevel then 
         self:RegisterEvent("CHAT_MSG_SYSTEM")
         self:RegisterEvent("UPDATE_INSTANCE_INFO")
         self:RegisterEvent("LFG_COMPLETION_REWARD")
@@ -163,6 +164,9 @@ function Ailo:OnEnable()
 	OpenCalendar()
 	-- self:CheckSeasonActive()
 	self:ScheduleTimer("CheckSeasonActive", 2) -- wait 3 secs 
+	
+	
+	self:ScheduleTimer("CheckCharGear", 5) -- wait 3 secs 
 	
 	
 end
@@ -403,14 +407,14 @@ function Ailo:PrepareTooltip(tooltip)
             dailyHeroicColum = tooltip:AddColumn("CENTER")
             tooltip:SetCell(1, dailyHeroicColum, "2")
             tooltip:SetCell(2, dailyHeroicColum, "x")
-            tooltip:SetCell(3, dailyHeroicColum, "|TInterface\\Icons\\inv_misc_frostemblem_01:0|t")
+            tooltip:SetCell(3, dailyHeroicColum, "|TInterface\\Icons\\inv_misc_frostemblem_01:20|t")
         end
         -- Weekly Raid column
         if self.db.profile.showWeeklyRaid then
             weeklyRaidColumn = tooltip:AddColumn("CENTER")
             tooltip:SetCell(1, weeklyRaidColumn, "5")
             tooltip:SetCell(2, weeklyRaidColumn, "x")
-            tooltip:SetCell(3, weeklyRaidColumn, "|TInterface\\Icons\\inv_misc_frostemblem_01:0|t")
+            tooltip:SetCell(3, weeklyRaidColumn, "|TInterface\\Icons\\inv_misc_frostemblem_01:20|t")
         end
         
         -- PvP Daily column
@@ -418,14 +422,14 @@ function Ailo:PrepareTooltip(tooltip)
             dailyPVPColumn = tooltip:AddColumn("CENTER")
             tooltip:SetCell(1, dailyPVPColumn, "25")
             tooltip:SetCell(2, dailyPVPColumn, "x")
-            tooltip:SetCell(3, dailyPVPColumn, "|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0|t")
+            tooltip:SetCell(3, dailyPVPColumn, "|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:20|t")
         end
         -- Wintergrasp Victory column
         if self.db.profile.showWGVictory then
             wgVictoryColumn = tooltip:AddColumn("CENTER")
             tooltip:SetCell(1, wgVictoryColumn, "10")
             tooltip:SetCell(2, wgVictoryColumn, "x")
-            tooltip:SetCell(3, wgVictoryColumn, "|TInterface\\Icons\\inv_misc_platnumdisks:0|t")
+            tooltip:SetCell(3, wgVictoryColumn, "|TInterface\\Icons\\inv_misc_platnumdisks:20|t")
         end
         
         -- Instances with lockouts
@@ -469,10 +473,13 @@ function Ailo:PrepareTooltip(tooltip)
                    instances.dailyheroic or instances.weeklydone or instances.wgvictory or instances.dailypvp or 
 				   instances.dailyseason then
                     lastline = tooltip:AddLine("")
+					
+					nameString = iteratePlayer
+					if instances.level then
+						nameString = "["..tostring(instances.level) .."] ".. iteratePlayer
+					end
                     if self.db.profile.showCharacterRealm then
-                      nameString = iteratePlayer.." - "..iterateRealm
-                    else
-                      nameString = iteratePlayer
+                      nameString = nameString.." - "..iterateRealm
                     end
 
                     if self.db.profile.useClassColors then
@@ -530,20 +537,39 @@ function Ailo:PrepareTooltip(tooltip)
 end
 
 function Ailo:BuildSortedKeyTables()
-    local c, r
+    local c, r, tempSortRealmsPlayer, tempTxt
     wipe(sortRealms)
     sortRealms = {}
     wipe(sortRealmsPlayer)
     sortRealmsPlayer = {}
+	tempSortRealmsPlayer = {}
     for r,_ in pairs(self.db.global.chars) do
         tinsert(sortRealms, r)
         sortRealmsPlayer[r] = {}
+        tempSortRealmsPlayer[r] = {}
         for c,_ in pairs(self.db.global.chars[r]) do
-            tinsert(sortRealmsPlayer[r],c)
+            -- tinsert(sortRealmsPlayer[r],c)
+            tinsert(tempSortRealmsPlayer[r], {name = c, iLevel = self.db.global.chars[r][c].iLevel or 0} )
+			-- print("--",c)
         end
-        tsort(sortRealmsPlayer[r])
+		-- table.sort(sortRealmsPlayer)
+		tempTxt = ""
+        table.sort(tempSortRealmsPlayer[r], function(c1, c2) 
+			if c1.iLevel and c2.iLevel then 
+				-- print( c1.name..":"..tostring(c1.iLevel) .. ", "..c2.name..":"..tostring(c2.iLevel) )
+				return c1.iLevel > c2.iLevel
+			else
+				return c1.name < c2.name
+			end
+		end)
+		
+		
+		for k,v in ipairs(tempSortRealmsPlayer[r]) do
+			table.insert(sortRealmsPlayer[r], v.name)
+			-- print(v.name, v.iLevel)
+		end
     end
-    tsort(sortRealms)
+    table.sort(sortRealms)
 end
 
 function Ailo:GetInstanceAbbr(instanceName)
@@ -665,7 +691,7 @@ function Ailo:DeleteFromRaidTable(instanceName, size, difficulty)
 end
 
 function Ailo:ManualPlayerUpdate()
-    if currentMaxLevel > UnitLevel("player") then return end
+    if currentMaxLevel > currentCharLevel then return end
 	
 	if debug_print then print("---DEBUG: Ailo:ManualPlayerUpdate() ---") end
 	
@@ -714,7 +740,7 @@ function Ailo:WipeDB()
 end
 
 function Ailo:UpdatePlayer()
-    if currentMaxLevel > UnitLevel("player") then return end
+    if currentMaxLevel > currentCharLevel then return end
 	
 	if debug_print then print("---DEBUG: Ailo:UpdatePlayer() ---") end
 	
@@ -825,6 +851,10 @@ function Ailo:UpdateDailyHeroicForChar()
 			end
 		else
 			self.db.global.chars[currentRealm][currentChar].dailyseason = nil
+			if Seasonal.ActiveHoliday.CheckForLFG and (Seasonal.ActiveHoliday.CheckForLFG < 2) then
+				Seasonal.ActiveHoliday.CheckForLFG = 2
+				LFDQueueFrame_SetType(Seasonal.ActiveHoliday.dungeon_id)
+			end
 		end
 	end
    
@@ -933,6 +963,8 @@ function Ailo:CheckSeasonActive()
 				for k,v in pairs(Seasonal.Events) do
 					if eventTexture == v.texture_name then
 						Seasonal.ActiveHoliday = Seasonal.Events[k] -- stores to local variable
+						Seasonal.ActiveHoliday.CheckForLFG = 1
+						-- LFDQueueFrame_SetType(Seasonal.ActiveHoliday.dungeon_id)
 						if debug_print then print("---DEBUG: detected Season:", k, v.texture_name) end
 					end
 				end
@@ -949,5 +981,45 @@ function Ailo:CheckSeasonActive()
 	end
 	
 end
+
+function Ailo:CheckCharGear()
+	-- print("------ Ailo:CheckCharGear")
+	local invSlot, itemRarity, itemLevel, itemID, accumLevel, numSlots
+	-- itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemID) 
+	local thisCharDB = self.db.global.chars[currentRealm][currentChar]
+	
+	accumLevel = 0
+	numSlots = 0
+	for _,invSlot in ipairs({1,2,3,5,6,7,8,9,10,11,12,13,14,15,16,17,18}) do		-- head to main hand
+		itemID = GetInventoryItemID("player", invSlot)
+		if itemID then 
+			_, _, itemRarity, itemLevel = GetItemInfo(itemID) 
+			if itemLevel then
+				accumLevel = accumLevel + itemLevel*itemRarity/4
+				
+				-- print("SLOT",invSlot,", itemID:",itemID,", itemLevel:",itemLevel, itemRarity)
+				numSlots = numSlots + 1
+			end
+		elseif (invSlot < 17) then
+			-- print("SLOT",invSlot,", empty")
+			numSlots = numSlots + 1
+		end
+	end
+	
+	if numSlots > 0 then
+		accumLevel = math.floor( accumLevel / numSlots * 10 ) / 10	-- avg item level
+	end
+	-- print("accumLevel:",accumLevel, numSlots)
+	
+	
+	if (not thisCharDB.iLevel) or (accumLevel > thisCharDB.iLevel) then
+		thisCharDB.iLevel = accumLevel
+	end
+	
+	thisCharDB.level = currentCharLevel
+end
+
+
+
 
 
