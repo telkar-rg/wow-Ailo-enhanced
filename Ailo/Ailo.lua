@@ -475,9 +475,9 @@ function Ailo:PrepareTooltip(tooltip)
                     lastline = tooltip:AddLine("")
 					
 					nameString = iteratePlayer
-					if instances.level then
-						nameString = "["..tostring(instances.level) .."] ".. iteratePlayer
-					end
+					-- if instances.level then
+						-- nameString = "["..tostring(instances.level) .."] ".. iteratePlayer
+					-- end
                     if self.db.profile.showCharacterRealm then
                       nameString = nameString.." - "..iterateRealm
                     end
