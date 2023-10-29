@@ -44,3 +44,6 @@ L["Wipe Database"] = "Datenbank löschen"
 
 L["Track 'Event boss'"] = "Zeige 'Event Boss'"
 L["TRACK_DAILY_EVENT_BOSS_DESC"] = "Während einem World Event, zeige ob der Charakter die 'Event Boss' Daily heute abgeschlossen hat"
+
+L["showOnlyWrathRaids"] = "Zeige nur WotLK Raids"
+L["showOnlyWrathRaids_DESC"] = "Es werden ausschließlich WotLK Schlachtzüge angezeigt und die restlichen Schlachtzug-IDs werden ignoriert"

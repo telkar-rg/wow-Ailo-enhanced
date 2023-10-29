@@ -44,6 +44,7 @@ local defaults = {
         showAllChars = false,
         showCharacterRealm = false,
         showDailyHeroic = true,
+        showOnlyWrathRaids = false,
         showMessages = true,
         showRealmHeaderLines = false,
         showWeeklyRaid = true,
@@ -259,65 +260,91 @@ function Ailo:GenerateOptions()
                             if value then LDBIcon:Show("Ailo") else LDBIcon:Hide("Ailo") end
                         end,
                     },
+					
+					description_spacer_1 = {
+						name =  "",
+						type = "description",
+						order = 7
+					},
+					
                     hc = {
                         type = "input",
-                        order = 7,
+                        order = 8,
                         name = L["Tooltip abbreviation used for heroic raids"],
                         width = "double",
                     },
                     nhc = {
                         type = "input",
-                        order = 8,
+                        order = 9,
                         name = L["Tooltip abbreviation used for nonheroic raids"],
                         width = "double",
                     },
+					
+					description_spacer_1 = {
+						name =  "",
+						type = "description",
+						order = 10
+					},
+					
+                    showOnlyWrathRaids = {
+                        type = "toggle",
+                        order = 20,
+                        name = L["showOnlyWrathRaids"],
+                        desc = L["showOnlyWrathRaids_DESC"],
+                    },
                     show5Man = {
                         type = "toggle",
-                        order = 9,
+                        order = 21,
                         name = L["Show 5-man instances"],
                     },
                     showDailyHeroic = {
                         type = "toggle",
-                        order = 10,
+                        order = 22,
                         name = L["Track 'Daily Heroic'"],
                         desc = L["TRACK_DAILY_HEROIC_DESC"],
                     },
                     showWeeklyRaid  = {
                         type = "toggle",
-                        order = 11,
+                        order = 23,
                         name = L["Track 'Weekly Raid'"],
                         desc = L["If the character has done the 'Weekly Raid' you get in Dalaran"],
                     },
                     showWGVictory  = {
                         type = "toggle",
-                        order = 12,
+                        order = 24,
                         name = L["Track 'WG Victory'"],
                         desc = L["If the character has done the 'Victory in Wintergrasp' weekly pvp quest"],
                     },
                     showDailyPVP  = {
                         type = "toggle",
-                        order = 13,
+                        order = 25,
                         name = L["Track PvP daily"],
                     },
                     showSeasonal  = {
                         type = "toggle",
-                        order = 14,
+                        order = 26,
                         name = L["Track 'Event boss'"],
                         desc = L["TRACK_DAILY_EVENT_BOSS_DESC"],
                     },
                     showRealmHeaderLines  = {
                         type = "toggle",
-                        order = -4,
+                        order = -11,
                         name = L["Show Realm Headers"],
                         desc = L["SHOW_REALMLINES_DESC"],
                     },                    
                     showAllChars  = {
                         type = "toggle",
-                        order = -3,
+                        order = -10,
                         name = L["Show all chars"],
                         desc = L["Regardles of any saved instances"],
-                    },                    
-
+                    },
+					
+					description_spacer_end = {
+						name =  "",
+						type = "description",
+						order = -3
+					},
+					
                     wipeDB = {
                         type = "execute",
                         name = L["Wipe Database"],
@@ -389,25 +416,27 @@ function Ailo:PrepareTooltip(tooltip)
 			raidorder_used[raidName] = true
 		end
 	end
-	for raidName, raidTable in pairs(self.db.global.raids) do 
-		if not raidorder_used[raidName] then
-			for size,_ in pairs(raidTable) do
-				if size > 5 then  -- sort between raids and dungeons
-					tinsert(raid_other, raidName)
-				else
-					tinsert(raid_dungeon, raidName)
+	if not self.db.profile.showOnlyWrathRaids then
+		for raidName, raidTable in pairs(self.db.global.raids) do 
+			if not raidorder_used[raidName] then
+				for size,_ in pairs(raidTable) do
+					if size > 5 then  -- sort between raids and dungeons
+						tinsert(raid_other, raidName)
+					else
+						tinsert(raid_dungeon, raidName)
+					end
+					break
 				end
-				break
 			end
 		end
-	end
-	sort(raid_other)	-- sort other raids by name
-	sort(raid_dungeon)	-- sort dungeons by name
-	for _, n in pairs(raid_other) do	-- add other raids to raid order
-		tinsert(raidPrio, n)
-	end
-	for _, n in pairs(raid_dungeon) do	-- add dungeons to raid order
-		tinsert(raidPrio, n)
+		sort(raid_other)	-- sort other raids by name
+		sort(raid_dungeon)	-- sort dungeons by name
+		for _, n in pairs(raid_other) do	-- add other raids to raid order
+			tinsert(raidPrio, n)
+		end
+		for _, n in pairs(raid_dungeon) do	-- add dungeons to raid order
+			tinsert(raidPrio, n)
+		end
 	end
 	wipe(raid_other)
 	wipe(raid_dungeon)

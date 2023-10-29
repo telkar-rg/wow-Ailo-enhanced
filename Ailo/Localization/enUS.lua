@@ -45,3 +45,6 @@ L["Wipe Database"] = true
 
 L["Track 'Event boss'"] = true
 L["TRACK_DAILY_EVENT_BOSS_DESC"] = "During a World Event, show a column in the tooltip indicating if a character has done the 'Event Boss instance'"
+
+L["showOnlyWrathRaids"] = "Show only WotLK Raids"
+L["showOnlyWrathRaids_DESC"] = "Will show only the WotLK raids and ignore other saved instances"
