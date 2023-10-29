@@ -1,3 +1,7 @@
+*.temp
+_Releases/*
+*.lnk
+
 # Compiled Lua sources
 luac.out
 
