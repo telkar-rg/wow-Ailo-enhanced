@@ -504,6 +504,15 @@ function Ailo:PrepareTooltip(tooltip)
 		
         self:BuildSortedKeyTables()
         local iterateRealm, iteratePlayer, nameString, instances, currentInstance, lastline, realmSepPosition, displayedName
+		local FreeR,FreeG,FreeB, LockR,LockG,LockB, jmp
+		FreeR = { [0] = min(1, 0.3+self.db.profile.freeraid.r) ,  [1] = max(0, -0.1+self.db.profile.freeraid.r) }
+		FreeG = { [0] = min(1, 0.3+self.db.profile.freeraid.g) ,  [1] = max(0, -0.1+self.db.profile.freeraid.g) }
+		FreeB = { [0] = min(1, 0.3+self.db.profile.freeraid.b) ,  [1] = max(0, -0.1+self.db.profile.freeraid.b) }
+		
+		LockR = { [0] = min(1, 0.3+self.db.profile.savedraid.r) , [1] = max(0, -0.1+self.db.profile.savedraid.r) }
+		LockG = { [0] = min(1, 0.3+self.db.profile.savedraid.g) , [1] = max(0, -0.1+self.db.profile.savedraid.g) }
+		LockB = { [0] = min(1, 0.3+self.db.profile.savedraid.b) , [1] = max(0, -0.1+self.db.profile.savedraid.b) }
+		
         for _,iterateRealm in ipairs(sortRealms) do
             if self.db.profile.showRealmHeaderLines then
                 lastline = tooltip:AddLine("")
@@ -512,9 +521,16 @@ function Ailo:PrepareTooltip(tooltip)
             for _,iteratePlayer in ipairs(sortRealmsPlayer[iterateRealm]) do
                 instances = charsdb[iterateRealm][iteratePlayer]
                 if self.db.profile.showAllChars or (instances.lockouts and next(instances.lockouts)) or 
-                   instances.dailyheroic or instances.weeklydone or instances.wgvictory or instances.dailypvp or 
-				   instances.dailyseason then
-                    lastline = tooltip:AddLine("")
+					instances.dailyheroic or instances.weeklydone or instances.wgvictory or instances.dailypvp or instances.dailyseason then
+					lastline = tooltip:AddLine("")
+					jmp = lastline%3==0 and 0 or 1
+					
+					-- function tipPrototype:SetLineColor(lineNum, r, g, b, a)
+					if jmp==0 then
+						tooltip:SetLineColor(lastline, 1,1,1, 0.25)
+					-- else
+						-- tooltip:SetLineColor(lastline, 0,0,0, 1)
+					end
 					
 					nameString = iteratePlayer
 					-- if instances.level then
@@ -532,25 +548,30 @@ function Ailo:PrepareTooltip(tooltip)
         
                     for i = tooltip:GetColumnCount(),2,-1 do
                         tooltip:SetCell(lastline, i, "") 
-                        tooltip:SetCellColor(lastline, i, self.db.profile.freeraid.r, self.db.profile.freeraid.g, self.db.profile.freeraid.b, self.db.profile.freeraid.a)
+                        -- tooltip:SetCellColor(lastline, i, self.db.profile.freeraid.r, self.db.profile.freeraid.g, self.db.profile.freeraid.b, self.db.profile.freeraid.a)
+                        tooltip:SetCellColor(lastline, i, FreeR[jmp], FreeG[jmp], FreeB[jmp], self.db.profile.freeraid.a)
                     end
                     if dailyHeroicColum and instances.dailyheroic then
-                        tooltip:SetCellColor(lastline, dailyHeroicColum, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        tooltip:SetCellColor(lastline, dailyHeroicColum, LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                     end
 					
                     if seasonDailyColumn and instances.dailyseason then
-                        tooltip:SetCellColor(lastline, seasonDailyColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        -- tooltip:SetCellColor(lastline, seasonDailyColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        tooltip:SetCellColor(lastline, seasonDailyColumn, LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                     end
 					
                     if weeklyRaidColumn and instances.weeklydone then
-                        tooltip:SetCellColor(lastline, weeklyRaidColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        -- tooltip:SetCellColor(lastline, weeklyRaidColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        tooltip:SetCellColor(lastline, weeklyRaidColumn, LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                     
                     end
                     if dailyPVPColumn and instances.dailpvp then
-                        tooltip:SetCellColor(lastline, dailyPVPColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        -- tooltip:SetCellColor(lastline, dailyPVPColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        tooltip:SetCellColor(lastline, dailyPVPColumn, LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                     end
                     if wgVictoryColumn and instances.wgvictory then
-                        tooltip:SetCellColor(lastline, wgVictoryColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        -- tooltip:SetCellColor(lastline, wgVictoryColumn, self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                        tooltip:SetCellColor(lastline, wgVictoryColumn, LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                     end
 					
 					local tnow = time()
@@ -564,7 +585,8 @@ function Ailo:PrepareTooltip(tooltip)
 								end
 								
 								tooltip:SetCell(lastline, raidorder[currentInstance], expire_text) -- change
-                                tooltip:SetCellColor(lastline, raidorder[currentInstance], self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                                -- tooltip:SetCellColor(lastline, raidorder[currentInstance], self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
+                                tooltip:SetCellColor(lastline, raidorder[currentInstance], LockR[jmp], LockG[jmp], LockB[jmp], self.db.profile.savedraid.a)
                                 -- tooltip:SetCellColor(lastline, raidorder[currentInstance], self.db.profile.savedraid.r, self.db.profile.savedraid.g, self.db.profile.savedraid.b, self.db.profile.savedraid.a)
                             end
                         end
