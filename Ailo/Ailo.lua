@@ -1,4 +1,6 @@
-﻿-- locals, helperfunctions 
+﻿local ADDON_NAME, ADDON_TABLE = ...
+
+-- locals, helperfunctions 
 local string_gsub, string_format, strfind, tsort, tinsert = string.gsub, string.format, strfind, table.sort, table.insert
 local wipe = wipe
 
@@ -17,6 +19,8 @@ local currentChar, currentRealm, currentCharRealm, currentMaxLevel, currentCharL
 
 local AceTimer = LibStub("AceTimer-3.0")
 AceTimer:Embed(Ailo)
+
+local TC = ADDON_TABLE.Constants
 
 -- Sorting
 local sortRealms = {}
@@ -65,7 +69,7 @@ local defaults = {
     },
 }
 
-local Seasonal = {}
+--[[ local Seasonal = {}
 Seasonal.ActiveHoliday = nil -- resets local variable
 Seasonal.Events = {
 	LoveInTheAir = { icon = "|TInterface\\Icons\\inv_valentinesboxofchocolates02:20|t", 
@@ -83,7 +87,8 @@ Seasonal.Events = {
     -- WinterVeil = { icon = "|TInterface\\Icons\\inv_holiday_christmas_present_01:20|t",
 					-- texture_name = "Calendar_WinterVeil",
 					-- quest_ids = { 6983, 7043 }, },
-}
+} ]]--
+local Seasonal = TC.Seasonal
 
 
 function Ailo:OnInitialize()
@@ -167,7 +172,6 @@ function Ailo:OnEnable()
 	
 	
 	self:ScheduleTimer("CheckCharGear", 5) -- wait 3 secs 
-	
 	
 end
 
@@ -374,6 +378,40 @@ function Ailo:PrepareTooltip(tooltip)
 	
     local charsdb = self.db.global.chars
     local raidsdb = self.db.global.raids
+    local raidPrio = {}
+    local raidorder_used = {}
+	local raid_other = {}
+	local raid_dungeon = {}
+	
+	for _, raidName in pairs(TC.RaidOrderLfgId) do -- check for high priority raids
+		if self.db.global.raids[raidName] then
+			tinsert(raidPrio, raidName)
+			raidorder_used[raidName] = true
+		end
+	end
+	for raidName, raidTable in pairs(self.db.global.raids) do 
+		if not raidorder_used[raidName] then
+			for size,_ in pairs(raidTable) do
+				if size > 5 then  -- sort between raids and dungeons
+					tinsert(raid_other, raidName)
+				else
+					tinsert(raid_dungeon, raidName)
+				end
+				break
+			end
+		end
+	end
+	sort(raid_other)	-- sort other raids by name
+	sort(raid_dungeon)	-- sort dungeons by name
+	for _, n in pairs(raid_other) do	-- add other raids to raid order
+		tinsert(raidPrio, n)
+	end
+	for _, n in pairs(raid_dungeon) do	-- add dungeons to raid order
+		tinsert(raidPrio, n)
+	end
+	wipe(raid_other)
+	wipe(raid_dungeon)
+	wipe(raidorder_used)	-- table clean up
     
     local nextPurge = self.db.global.nextPurge
     if nextPurge > 0 and time() > (nextPurge + 60) then
@@ -433,11 +471,15 @@ function Ailo:PrepareTooltip(tooltip)
         end
         
         -- Instances with lockouts
-        local raidabbr
-        for raid, sizes in pairs(raidsdb) do
+        local raidabbr, sizes
+        -- for raid, sizes in pairs(raidsdb) do
+		HelperAddon_DB.global.DEBUG=raidPrio
+        for _, raid in pairs(raidPrio) do
+			sizes = raidsdb[raid]
             colcount = 0 -- Span needed for the 'Raid' cell above the 'Size' cells
             raidabbr = self:GetInstanceAbbr(raid)
             if raidabbr then
+				-- print("DEBUG", raid, raidabbr, "type(sizes)",type(sizes))
                 for size, difficulties in pairs(sizes) do
                     numdifficulties = 0 -- Span needed for the 'Size' cell above the 'Difficulty' cells
     
@@ -573,6 +615,7 @@ function Ailo:BuildSortedKeyTables()
 end
 
 function Ailo:GetInstanceAbbr(instanceName)
+	if debug_print then print("---DEBUG: Ailo:GetInstanceAbbr() ---", instanceName) end
     if not self.db.profile.instanceAbbr[instanceName] then
         -- Has no abbreviation yet, try it with a somewhat good guess
         -- Tries to get the first char of every word, does not go well with utf-8 chars
@@ -986,6 +1029,7 @@ function Ailo:CheckCharGear()
 	-- print("------ Ailo:CheckCharGear")
 	local invSlot, itemRarity, itemLevel, itemID, accumLevel, numSlots
 	-- itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemID) 
+	if not self.db.global.chars[currentRealm] then return end
 	local thisCharDB = self.db.global.chars[currentRealm][currentChar]
 	if not thisCharDB then return end
 	
