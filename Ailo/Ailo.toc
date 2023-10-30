@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Author: Starfox
-## Title: Ailo |cff33ff99Enhanced|r (1.2.2)
+## Title: Ailo |cff33ff99Enhanced|r (1.2.2a)
 ## Notes: Am I locked out?|nDisplays all RaidIDs for all chars
 ## SavedVariables: AiloDB
 ## OptionalDeps: Ace3, LibDBIcon-1.0, LibQTip-1.0, !ClassColors
