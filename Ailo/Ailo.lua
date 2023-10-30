@@ -502,7 +502,7 @@ function Ailo:PrepareTooltip(tooltip)
         -- Instances with lockouts
         local raidabbr, sizes
         -- for raid, sizes in pairs(raidsdb) do
-		HelperAddon_DB.global.DEBUG=raidPrio
+		
         for _, raid in pairs(raidPrio) do
 			sizes = raidsdb[raid]
             colcount = 0 -- Span needed for the 'Raid' cell above the 'Size' cells
