@@ -93,7 +93,7 @@ local Seasonal = TC.Seasonal
 
 
 function Ailo:OnInitialize()
-	if debug_print then print("---DEBUG: Ailo:OnInitialize() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:OnInitialize() ---") end
 
     -- currentMaxLevel = MAX_PLAYER_LEVEL_TABLE[#MAX_PLAYER_LEVEL_TABLE]
 	currentMaxLevel = 80 -- we can get ids from lvl 50 onwards (ZG, AQ)
@@ -163,7 +163,7 @@ end
 
 
 function Ailo:OnEnable()
-	if debug_print then print("---DEBUG: Ailo:OnEnable() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:OnEnable() ---") end
 	-- check, if we have an active season
 	-- self:CheckSeasonActive()
 	
@@ -196,7 +196,7 @@ function Ailo:SetupClasscoloredFonts()
 end
 
 function Ailo:GenerateOptions()
-	if debug_print then print("---DEBUG: Ailo:GenerateOptions() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:GenerateOptions() ---") end
 	
     Ailo.options = {
         name = "Ailo",
@@ -392,7 +392,7 @@ function Ailo:Output(...)
 end 
 
 function Ailo:PrepareTooltip(tooltip)
-	if debug_print then print("---DEBUG: Ailo:PrepareTooltip(tooltip) ---") end
+	-- if debug_print then print("---DEBUG: Ailo:PrepareTooltip(tooltip) ---") end
 	
     local raidorder = {}
     -- Cell are just colored green/red
@@ -409,6 +409,19 @@ function Ailo:PrepareTooltip(tooltip)
     local raidorder_used = {}
 	local raid_other = {}
 	local raid_dungeon = {}
+	
+	wipe(raid_other)
+	wipe(raid_dungeon)
+	wipe(raidorder_used)	-- table clean up
+    
+    local nextPurge = self.db.global.nextPurge
+    if nextPurge > 0 and time() > (nextPurge + 60) then
+        -- Only search 
+        self:PurgeOldRaidIDs()
+        self:TrimRaidTable()
+        self:CheckDailyHeroicLockouts()
+        self.db.global.nextPurge = self:GetNextPurge()
+    end
 	
 	for _, raidName in pairs(TC.RaidOrderLfgId) do -- check for high priority raids
 		if self.db.global.raids[raidName] then
@@ -438,18 +451,6 @@ function Ailo:PrepareTooltip(tooltip)
 			tinsert(raidPrio, n)
 		end
 	end
-	wipe(raid_other)
-	wipe(raid_dungeon)
-	wipe(raidorder_used)	-- table clean up
-    
-    local nextPurge = self.db.global.nextPurge
-    if nextPurge > 0 and time() > (nextPurge + 60) then
-        -- Only search 
-        self:PurgeOldRaidIDs()
-        self:TrimRaidTable()
-        self:CheckDailyHeroicLockouts()
-        self.db.global.nextPurge = self:GetNextPurge()
-    end
 
     if next(raidsdb) or self.db.profile.showAllChars or 
        self.db.profile.showDailyHeroic or self.db.profile.showWeeklyRaid or 
@@ -504,9 +505,11 @@ function Ailo:PrepareTooltip(tooltip)
         -- for raid, sizes in pairs(raidsdb) do
 		
         for _, raid in pairs(raidPrio) do
+			-- print("-ailo |",_, raid)
 			sizes = raidsdb[raid]
             colcount = 0 -- Span needed for the 'Raid' cell above the 'Size' cells
             raidabbr = self:GetInstanceAbbr(raid)
+			
             if raidabbr then
 				-- print("DEBUG", raid, raidabbr, "type(sizes)",type(sizes))
                 for size, difficulties in pairs(sizes) do
@@ -645,7 +648,7 @@ function Ailo:BuildSortedKeyTables()
 end
 
 function Ailo:GetInstanceAbbr(instanceName)
-	if debug_print then print("---DEBUG: Ailo:GetInstanceAbbr() ---", instanceName) end
+	-- if debug_print then print("---DEBUG: Ailo:GetInstanceAbbr() ---", instanceName) end
     if not self.db.profile.instanceAbbr[instanceName] then
         -- Has no abbreviation yet, try it with a somewhat good guess
         -- Tries to get the first char of every word, does not go well with utf-8 chars
@@ -656,7 +659,7 @@ function Ailo:GetInstanceAbbr(instanceName)
 end
 
 function Ailo:GetNextPurge()
-	if debug_print then print("---DEBUG: Ailo:GetNextPurge() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:GetNextPurge() ---") end
 	
     local charsdb = self.db.global.chars
     local realm, charscurrentPlayer, instances, currentInstance, expireTime
@@ -766,7 +769,7 @@ end
 function Ailo:ManualPlayerUpdate()
     if currentMaxLevel > currentCharLevel then return end
 	
-	if debug_print then print("---DEBUG: Ailo:ManualPlayerUpdate() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:ManualPlayerUpdate() ---") end
 	
     self:Output(L["Updating data for current player."])
     if not self.db.global.chars[currentRealm] then 
@@ -815,7 +818,7 @@ end
 function Ailo:UpdatePlayer()
     if currentMaxLevel > currentCharLevel then return end
 	
-	if debug_print then print("---DEBUG: Ailo:UpdatePlayer() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:UpdatePlayer() ---") end
 	
     self.db.global.charClass[currentCharRealm] = select(2,UnitClass('player'))
     local now, index = time()
@@ -859,7 +862,7 @@ function Ailo:CHAT_MSG_SYSTEM(event, msg)
 end
 
 function Ailo:CheckDailyHeroicLockouts()
-	if debug_print then print("---DEBUG: Ailo:CheckDailyHeroicLockouts() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:CheckDailyHeroicLockouts() ---") end
 	
     local charsdb = self.db.global.chars
     local iterateRealm, iteratePlayer, instances, expireTime
@@ -868,29 +871,29 @@ function Ailo:CheckDailyHeroicLockouts()
         for iteratePlayer, instances in pairs(charsdb[iterateRealm]) do 
             if instances.dailyheroic and now > instances.dailyheroic then
                 self.db.global.chars[iterateRealm][iteratePlayer].dailyheroic = nil
-				if debug_print then print("---RESET dailyheroic ---") end
+				-- if debug_print then print("---RESET dailyheroic ---") end
             end
 			
             if instances.dailyseason and now > instances.dailyseason then
                 self.db.global.chars[iterateRealm][iteratePlayer].dailyseason = nil
-				if debug_print then print("---RESET dailyseason ---") end
+				-- if debug_print then print("---RESET dailyseason ---") end
             end
 			
             if instances.weeklydone and now > instances.weeklydone then
                 self.db.global.chars[iterateRealm][iteratePlayer].weeklydone = nil
-				if debug_print then print("---RESET weeklydone ---") end
+				-- if debug_print then print("---RESET weeklydone ---") end
             end
 			
             if instances.wgvictory and now > instances.wgvictory then
                 self.db.global.chars[iterateRealm][iteratePlayer].wgvictory = nil
-				if debug_print then print("---RESET wgvictory ---") end
+				-- if debug_print then print("---RESET wgvictory ---") end
             end
         end
     end
 end
 
 function Ailo:UpdateDailyHeroicForChar()
-	if debug_print then print("---DEBUG: Ailo:UpdateDailyHeroicForChar() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:UpdateDailyHeroicForChar() ---") end
 	
     if not self.db.global.chars[currentRealm] then
         self.db.global.chars[currentRealm] = {}
@@ -935,7 +938,7 @@ end
 
 local questscompleted = {}
 function Ailo:QUEST_QUERY_COMPLETE()
-	if debug_print then print("---DEBUG: Ailo:QUEST_QUERY_COMPLETE() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:QUEST_QUERY_COMPLETE() ---") end
 	
     GetQuestsCompleted(questscompleted)
     if not self.db.global.chars[currentRealm] then
@@ -957,7 +960,7 @@ function Ailo:QUEST_QUERY_COMPLETE()
 	else
 		next_reset = next_reset + 3600*24*(reset_wday - wday + 0) -- if the current weekday is before of the reset weekday
 	end
-	if debug_print then print("---wday "..tostring(date("*t",(next_reset) ).wday) ) end
+	-- if debug_print then print("---wday "..tostring(date("*t",(next_reset) ).wday) ) end
 
     --[[ 13181 and 13183 are horde and alliance versions
     of the Victory in Wintergrasp weekly quest ]]--
@@ -970,7 +973,7 @@ function Ailo:QUEST_QUERY_COMPLETE()
     for i=24579,24590 do
         if questscompleted[i] then
             self.db.global.chars[currentRealm][currentChar].weeklydone = next_reset
-			if debug_print then print("---weekly quest: "..tostring(i) ) end
+			-- if debug_print then print("---weekly quest: "..tostring(i) ) end
             return
         end
     end
@@ -994,16 +997,16 @@ end
 
 
 function Ailo:QUEST_COMPLETE(...)
-	if debug_print then print("---DEBUG: Ailo:QUEST_COMPLETE() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:QUEST_COMPLETE() ---") end
 	
 	questWeeklyFlag = false -- default assignment
 	
 	-- /run print( QuestIsWeekly() )
 	if QuestIsWeekly() then 
 		questWeeklyFlag = true
-		if debug_print then print("This is a Weekly Quest!") end
+		-- if debug_print then print("This is a Weekly Quest!") end
 	else 
-		if debug_print then print("This is NOT a Weekly Quest!") end
+		-- if debug_print then print("This is NOT a Weekly Quest!") end
 	end
 	
 end
@@ -1012,7 +1015,7 @@ function Ailo:QUEST_FINISHED(...)
 	if questWeeklyFlag ~= true then return end -- exit, if the currently displayed quest is not a weekly quest
 	questWeeklyFlag = false -- always reset the flag
 	
-	if debug_print then print("---DEBUG: Ailo:QUEST_FINISHED() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:QUEST_FINISHED() ---") end
 	
 	QueryQuestsCompleted() -- query the list of completed quests to update
 	
@@ -1022,7 +1025,7 @@ function Ailo:CheckSeasonActive()
 	local eventName, eventTexture, month, day, numEvents
 	Seasonal.ActiveHoliday = nil -- resets local variable
 	
-	if debug_print then print("---DEBUG: Ailo:CheckSeasonActive() ---") end
+	-- if debug_print then print("---DEBUG: Ailo:CheckSeasonActive() ---") end
 	
 	_, month, day, _ = CalendarGetDate(); -- get current date
 	CalendarSetAbsMonth(month) -- set the Calender to be at the current month, current year (absolute)
@@ -1038,7 +1041,7 @@ function Ailo:CheckSeasonActive()
 						Seasonal.ActiveHoliday = Seasonal.Events[k] -- stores to local variable
 						Seasonal.ActiveHoliday.CheckForLFG = 1
 						-- LFDQueueFrame_SetType(Seasonal.ActiveHoliday.dungeon_id)
-						if debug_print then print("---DEBUG: detected Season:", k, v.texture_name) end
+						-- if debug_print then print("---DEBUG: detected Season:", k, v.texture_name) end
 					end
 				end
 			end
@@ -1046,12 +1049,12 @@ function Ailo:CheckSeasonActive()
 		
 	end
 	
-	if debug_print then
-		print(numEvents) -- debug
-		if Seasonal.ActiveHoliday then
-			if numEvents > 0 then print(Seasonal.ActiveHoliday.texture_name) end
-		end
-	end
+	-- if debug_print then
+		-- print(numEvents) -- debug
+		-- if Seasonal.ActiveHoliday then
+			-- if numEvents > 0 then print(Seasonal.ActiveHoliday.texture_name) end
+		-- end
+	-- end
 	
 end
 
