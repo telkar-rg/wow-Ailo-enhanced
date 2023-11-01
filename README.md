@@ -3,7 +3,7 @@ Enhanced version of tow WotLK addon "Am I Locked Out"
 
 
 ## Changes
-- [v1.2.2a](https://github.com/telkar-rg/wow-Ailo-enhanced/releases/tag/v1.2.2a)
+- [v1.2.2b](https://github.com/telkar-rg/wow-Ailo-enhanced/releases/tag/v1.2.2b)
   - Added sorting to show WotLK raids first
   - Added option to show only WotLK raid lockouts
   - (Hotfix)
